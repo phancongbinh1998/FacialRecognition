@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Login Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            ::placeholder {
+                color: silver;
+                opacity: 1; /* Firefox */
+            }
+
+            :-ms-input-placeholder { /* Internet Explorer 10-11 */
+                color: silver;
+            }
+
+            ::-ms-input-placeholder { /* Microsoft Edge */
+                color: black;
+
+            }
+
+            input:active {
+                outline: 0; opacity: 0.6; color: #fff;
+            }
+
+            body{
+                background-image: url("53393897_2615988361776381_2663589754628472832_n.jpg");
+                /*                  background-color: whitesmoke;*/
+            }
+            h1{
+                font-size: 40px;
+
+            }
+            #icon{
+                width: 100%;
+                height: 150px;
+
+            }
+            #lable{
+                width: 100%;
+                height: 150px;
+                float: left;
+                text-align: center;
+            }
+
+        </style>
+    </head>
+    <body>
+        <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.5.3/firebase-firestore.js"></script>
+        <script>
+            // Initialize Firebase
+            var config = {
+                apiKey: "AIzaSyDOabs5e-f1nbFK992-DAjwTngcW_wdNt8",
+                authDomain: "facedetection-aa172.firebaseapp.com",
+                databaseURL: "https://facedetection-aa172.firebaseio.com",
+                projectId: "facedetection-aa172",
+                storageBucket: "facedetection-aa172.appspot.com",
+                messagingSenderId: "984056088423"
+            };
+            firebase.initializeApp(config);
+            var firestore = firebase.firestore();
+        </script>
+        <div style="margin-left: 28%; margin-top: 12%; width: 600px; height: 400px;
+             border-radius: 4px;background-color:whitesmoke; opacity: 0.7;">
+
+            <div id="icon" >
+                <div id="lable">
+                    <h1>Login To Our Site</h1>
+                </div>
+            </div>
+          
+            <input type="text" name="username" id="username" placeholder="Username..." style="width: 500px;
+                   height: 40px; margin-left: 35px; border-radius: 4px; border: 3px solid black; font-size: 20px; padding-left: 20px;
+                   "></br></br>
+            <input type="password" name="password" id="password" placeholder="Password..." style="width: 500px;
+                   height: 40px; margin-left: 35px; border-radius: 4px; border: 3px solid black; font-size: 20px; padding-left: 20px;"/></br></br>
+            <input type="submit" value="Login" onclick="check()" style="display: inline-block;
+                   height: 50px;
+                   margin: 5px;
+                   width: 75px;
+                   background: #7B0D1E;
+                   font-size: 16px;
+                   color: #fff;
+                   -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; margin-left: 395px;"/>
+            <input type="reset" value="Reset" style="display: inline-block;
+                   height: 50px;
+                   margin: 5px;
+                   width: 75px;
+                   background: #7B0D1E;
+                   font-size: 16px;
+                   color: #fff;
+                   -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px;"/>
+
+        </div>
+
+        <script>
+
+            const proList = document.querySelector("#proList");
+            let listAdmin = new Array();
+            firestore.collection("AdminAccount").onSnapshot(function (querySnapshot) {
+                querySnapshot.docChanges().forEach(function (change) {
+                    if (change.type === "added") {
+                        var username = change.doc.data().username;
+                        var password = change.doc.data().password;
+                        var dto = new adminDTO();
+                        dto.setInfo(username, password);
+                        listAdmin.push(dto);
+                    }
+
+                });
+            });
+
+            function check() {
+
+                for (var i = 0; i < listAdmin.length; i++) {
+                    if (document.getElementById("username").value === listAdmin[i].getUsername()) {
+                        document.getElementById("username").style.border = "3px solid black";
+                        if (document.getElementById("password").value === listAdmin[i].getPassword()) {
+                            document.getElementById("password").style.border = "3px solid black";
+                            window.location = "adminPage.html";
+                        } else {
+                            document.getElementById("password").style.border = "3px solid #7B0D1E";
+                        }
+                    } else {
+                        document.getElementById("username").style.border = "3px solid #7B0D1E";
+                    }
+                }
+
+            }
+
+            function adminDTO() {
+                this.username = '';
+                this.password = '';
+
+                this.setInfo = function (username, password) {
+                    this.username = username;
+                    this.password = password;
+                };
+
+                this.getUsername = function () {
+                    return this.username;
+                };
+
+                this.setUsername = function (username) {
+                    this.username = username;
+                };
+
+                this.getPassword = function () {
+                    return this.password;
+                };
+
+                this.setPassword = function (password) {
+                    this.password = password;
+                };
+            }
+
+
+        </script>
+    </body>
+</html>

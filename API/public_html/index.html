@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>APIPage</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.5.3/firebase-firestore.js"></script>
+        <script>
+            // Initialize Firebase
+            var config = {
+                apiKey: "AIzaSyDOabs5e-f1nbFK992-DAjwTngcW_wdNt8",
+                authDomain: "facedetection-aa172.firebaseapp.com",
+                databaseURL: "https://facedetection-aa172.firebaseio.com",
+                projectId: "facedetection-aa172",
+                storageBucket: "facedetection-aa172.appspot.com",
+                messagingSenderId: "984056088423"
+            };
+            firebase.initializeApp(config);
+            var firestore = firebase.firestore();
+        </script>
+
+        <h1>API Server</h1>
+        <script>
+
+            firestore.collection("urlPictures").onSnapshot(function (querySnapshot) {
+
+                querySnapshot.docChanges().forEach(function (change) {
+                    if (change.type === "added") {
+                        
+         
+                        if (change.doc.data().empID !== '') {
+                            window.open('http://localhost:9001/cgi-bin/saveimage.py');
+                        }
+
+                    }
+
+                });
+            });
+            firestore.collection("loginURLs").onSnapshot(function (querySnapshot) {
+
+                querySnapshot.docChanges().forEach(function (change) {
+                    if (change.type === "added") {
+                        if (change.doc.data().url) {
+                            var isDone = 'false';
+
+                            setTimeout(function () {
+                                if (isDone === 'false') {
+                                    window.open('http://localhost:9001/cgi-bin/ftf42.py');
+
+                                }
+                            }, 3000);
+
+                            firestore.collection("Match").onSnapshot(function (querySnapshot) {
+                                querySnapshot.docChanges().forEach(function (change) {
+                                    isDone = change.doc.data().isDone;
+
+                                    setTimeout(function () {
+                                        if (isDone === 'true') {
+                                        
+                                            firestore.collection("Match").onSnapshot(function (querySnapshot) {
+
+                                                querySnapshot.docChanges().forEach(function (change) {
+
+                                                    if (change.type === "added") {
+
+                                                        var isMatch;
+                                                        var empID;
+                                                        var disable;
+                                                        var name;
+                                                        firestore.collection("Match").onSnapshot(function (querySnapshot) {
+
+                                                            querySnapshot.docChanges().forEach(function (change) {
+                                                                if (change.type === "added") {
+                                                                    isMatch = change.doc.data().isMatch;
+                                                                    empID = change.doc.data().empID;
+
+                                                                }
+
+                                                            });
+                                                        });
+
+                                                        firestore.collection("Employee").onSnapshot(function (querySnapshot) {
+
+                                                            querySnapshot.docChanges().forEach(function (change) {
+                                                                if (change.type === "added") {
+
+                                                                    if (empID === change.doc.data().EmpID) {
+                                                                        disable = change.doc.data().Disable;
+                                                                        name = change.doc.data().EmpName;
+                                                                        if (disable === "false") {
+                                                                            afterDetection();
+                                                                        } else {
+                                                                            afterDetection();
+                                                                        }
+                                                                    }
+                                                                    
+
+                                                                }
+
+                                                            });
+                                                        });
+
+                                                        function afterDetection() {
+                                                            delDetail();
+                                                           
+                                                                const docRef = firestore.collection("afterDetection/").doc();
+                                                                docRef.set({
+                                                                    disable: disable,
+                                                                    isMatch: isMatch,
+                                                                    empID: empID,
+                                                                    isDone: "true",
+                                                                    name: name
+
+                                                                }).then(function () {
+                                                                    console.log("Status save!");
+                                                                });
+                                                          
+
+                                                        }
+                                                        function delDetail() {
+                                                            let cont = new Array();
+
+                                                            firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
+                                                                querySnapshot.docChanges().forEach(function (change) {
+                                                                    var id = change.doc.id;
+                                                                    cont.push(id);
+                                                                    if (cont.length === 2) {
+                                                                        firestore.collection("afterDetection").doc(cont[1]).delete();
+                                                                    }
+
+                                                                });
+                                                            });
+
+                                                        }
+                                                    }
+
+
+                                                });
+                                            });
+
+                                        }
+                                    }, 2000);
+
+
+
+                                });
+                            });
+
+                        }
+
+                    }
+
+                });
+            });
+
+
+
+
+
+        </script>
+    </body>
+</html>

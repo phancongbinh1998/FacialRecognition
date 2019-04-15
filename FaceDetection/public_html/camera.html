@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>CameraPage</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.5.3/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.8.6/firebase.js"></script>
+        <script>
+            // Initialize Firebase
+            var config = {
+                apiKey: "AIzaSyDOabs5e-f1nbFK992-DAjwTngcW_wdNt8",
+                authDomain: "facedetection-aa172.firebaseapp.com",
+                databaseURL: "https://facedetection-aa172.firebaseio.com",
+                projectId: "facedetection-aa172",
+                storageBucket: "facedetection-aa172.appspot.com",
+                messagingSenderId: "984056088423"
+            };
+            firebase.initializeApp(config);
+            var firestore = firebase.firestore();
+        </script> 
+        <div style="width: 100%; height: 50%; float: right;">
+            <video id="video" style="width: 50%; height: 450px; "></video>
+            <canvas id="canvas" style="width: 672px; height: 475px; float:right; margin-top: 34px; "></canvas>
+        </div>
+        <button onclick="snap()" >Snap</button></br>
+        <progress value="0" max="100" id="uploader" style="width: 100%;">0%</progress>
+        <!--        <input type="file" value="upload" id="fileButton" />-->
+        <script>
+            var video = document.getElementById('video');
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var uploader = document.getElementById("uploader");
+            var empID;
+            var ID;
+            var isUpdate;
+            var registerPic;
+            firestore.collection("registerOrUpdateByEmpID").onSnapshot(function (querySnapshot) {
+
+                querySnapshot.docChanges().forEach(function (change) {
+                    if (change.type === "added") {
+                        empID = change.doc.data().EmpID;
+                        ID = change.doc.data().ID;
+                        isUpdate = change.doc.data().isUpdate;
+                        registerPic = change.doc.data().registerPic;
+                    }
+
+                });
+            });
+
+//            firestore.collection("Employee").onSnapshot(function (querySnapshot) {
+//
+//                querySnapshot.docChanges().forEach(function (change) {
+//                    if (change.type === "added") {
+//                        registerPic = change.doc.data().registerPic;
+//                        alert(registerPic);
+//                    }
+//
+//                });
+//            });
+
+            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
+                    navigator.oGetUserMedia || navigator.msGetUserMedia;
+
+            if (navigator.getUserMedia) {
+                navigator.getUserMedia({video: true}, streamWebCam, throwError);
+            }
+
+            function streamWebCam(stream) {
+                video.src = window.URL.createObjectURL(stream);
+               
+                video.play();
+                
+            }
+
+            function throwError(e) {
+                alert(e.name);
+            }
+
+            function uploadPic() {
+                registerPic++;
+                var date = new Date();
+                canvas.width = video.clientWidth;
+                canvas.height = video.clientHeight;
+                context.rect(180, 60, 300, 300);
+                context.stroke();
+                context.clip();
+                context.drawImage(video, 0, 0);
+                var img = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+                var storageRef = firebase.storage().ref(empID + '/' + date);
+                if (!HTMLCanvasElement.prototype.toBlob) {
+                    Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+                        value: function (callback, type, quality) {
+                            var canvas = this;
+                            setTimeout(function () {
+                                var binStr = atob(canvas.toDataURL(type, quality).split(',')[1]),
+                                        len = binStr.length,
+                                        arr = new Uint8Array(len);
+
+                                for (var i = 0; i < len; i++) {
+                                    arr[i] = binStr.charCodeAt(i);
+                                }
+
+                                callback(new Blob([arr], {type: type || 'image/png'}));
+                            });
+                        }
+                    });
+                }
+                canvas.toBlob(function (blob) {
+                    var image = new Image();
+                    image.src = img;
+                    var task = storageRef.put(blob);
+                    task.on('state_changed', function progress(snapshot) {
+                        var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        uploader.value = percentage;
+                        firestore.collection("Employee").doc(ID).update({
+                            registerPic: registerPic
+                        });
+
+                    },
+                            function error(err) {
+
+                            },
+                            function () {
+                                task.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                                    const docRef = firestore.collection("urlPictures/").doc();
+                                    docRef.set({
+                                        empID: empID,
+                                        url: downloadURL,
+                                        date: date
+
+                                    }).then(function () {
+                                        console.log("Status save!");
+                                    });
+                                });
+
+                                firestore.collection("Fail").onSnapshot(function (querySnapshot) {
+                                    querySnapshot.docChanges().forEach(function (change) {
+
+                                        if (change.doc.data().isFail === 'true') {
+                                            alert("Upload Fail! Try again!");
+                                            firestore.collection("urlPictures").onSnapshot(function (querySnapshot) {
+                                                querySnapshot.docChanges().forEach(function (change) {
+                                                    var id = change.doc.id;
+                                                    firestore.collection("urlPictures").doc(id).delete();
+
+
+                                                });
+                                            });
+                                            firestore.collection("Employee").doc(ID).update({
+                                                registerPic: '0'
+                                            });
+                                        }
+
+                                    });
+                                });
+
+                            }
+                    );
+                });
+            }
+            function snap() {
+                if (isUpdate === 'false') {
+                    if (registerPic !== 5) {
+
+                        uploadPic();
+
+                    } else {
+                        firestore.collection("Employee").doc(ID).update({
+                            insufficient: 'true'
+                        });
+                        setTimeout(function () {
+                            alert("SUFFICIENT FOR REGISTER PICTURES!!!");
+                            window.location = "adminPage.html";
+                        }, 1000);
+
+
+                    }
+                } else {
+
+                    uploadPic();
+
+
+                }
+
+
+
+            }
+
+//            var fileButton = document.getElementById("fileButton");
+//
+//            fileButton.addEventListener('change', function (e) {
+//                var file = e.target.files[0];
+//                var storageRef = firebase.storage().ref('pictures/' + file.name);
+//                var task = storageRef.put(file);
+//                task.on('state_changed',
+//                        function progress(snapshot) {
+//                            var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+//                            uploader.value = percentage;
+//                        },
+//                        function error(err) {
+//
+//                        },
+//                        function complete() {
+//
+//                        }
+//                );
+//            });
+        </script>
+    </body>
+</html>
