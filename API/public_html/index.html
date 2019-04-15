@@ -29,14 +29,14 @@ and open the template in the editor.
 
         <h1>API Server</h1>
         <script>
-
+            var count = 0;
             firestore.collection("urlPictures").onSnapshot(function (querySnapshot) {
 
                 querySnapshot.docChanges().forEach(function (change) {
                     if (change.type === "added") {
                         
-         
-                        if (change.doc.data().empID !== '') {
+                        count++;
+                        if (change.doc.data().empID !== '' && count === 5) {
                             window.open('http://localhost:9001/cgi-bin/saveimage.py');
                         }
 
