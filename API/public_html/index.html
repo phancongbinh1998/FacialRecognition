@@ -29,13 +29,13 @@ and open the template in the editor.
 
         <h1>API Server</h1>
         <script>
-            
+            var count = 0;
             firestore.collection("urlPictures").onSnapshot(function (querySnapshot) {
 
                 querySnapshot.docChanges().forEach(function (change) {
                     if (change.type === "added") {
-  
-                        if (change.doc.data().empID !== '' ) {
+                        count++;
+                        if (change.doc.data().empID !== '' && count >= 5) {
                             window.open('http://13.59.43.254/cgi-bin/saveimage.py');
                         }
 
@@ -55,101 +55,62 @@ and open the template in the editor.
                                     window.open('http://13.59.43.254/cgi-bin/ftf42.py');
 
                                 }
-                            }, 3000);
+                            }, 1000);
 
-                            firestore.collection("Match").onSnapshot(function (querySnapshot) {
+                            var ad = firestore.collection("Match").onSnapshot(function (querySnapshot) {
                                 querySnapshot.docChanges().forEach(function (change) {
                                     isDone = change.doc.data().isDone;
+                                    if (isDone === 'true') {
 
-                                    setTimeout(function () {
-                                        if (isDone === 'true') {
-                                        
-                                            firestore.collection("Match").onSnapshot(function (querySnapshot) {
+                                        var isMatch;
+                                        var empID;
+                                        var disable;
+                                        var name;
 
-                                                querySnapshot.docChanges().forEach(function (change) {
+                                        isMatch = change.doc.data().isMatch;
+                                        empID = change.doc.data().empID;
 
-                                                    if (change.type === "added") {
 
-                                                        var isMatch;
-                                                        var empID;
-                                                        var disable;
-                                                        var name;
-                                                        firestore.collection("Match").onSnapshot(function (querySnapshot) {
+                                        firestore.collection("Employee").onSnapshot(function (querySnapshot) {
 
-                                                            querySnapshot.docChanges().forEach(function (change) {
-                                                                if (change.type === "added") {
-                                                                    isMatch = change.doc.data().isMatch;
-                                                                    empID = change.doc.data().empID;
+                                            querySnapshot.docChanges().forEach(function (change) {
+                                                if (change.type === "added") {
 
-                                                                }
-
-                                                            });
-                                                        });
-
-                                                        firestore.collection("Employee").onSnapshot(function (querySnapshot) {
-
-                                                            querySnapshot.docChanges().forEach(function (change) {
-                                                                if (change.type === "added") {
-
-                                                                    if (empID === change.doc.data().EmpID) {
-                                                                        disable = change.doc.data().Disable;
-                                                                        name = change.doc.data().EmpName;
-                                                                        if (disable === "false") {
-                                                                            afterDetection();
-                                                                        } else {
-                                                                            afterDetection();
-                                                                        }
-                                                                    }
-                                                                    
-
-                                                                }
-
-                                                            });
-                                                        });
-
-                                                        function afterDetection() {
-                                                            delDetail();
+                                                    if (empID === change.doc.data().EmpID) {
+                                                        disable = change.doc.data().Disable;
+                                                        name = change.doc.data().EmpName;
+                                                        if (disable === "false") {
                                                            
-                                                                const docRef = firestore.collection("afterDetection/").doc();
-                                                                docRef.set({
-                                                                    disable: disable,
-                                                                    isMatch: isMatch,
-                                                                    empID: empID,
-                                                                    isDone: "true",
-                                                                    name: name
-
-                                                                }).then(function () {
-                                                                    console.log("Status save!");
-                                                                });
-                                                          
-
-                                                        }
-                                                        function delDetail() {
-                                                            let cont = new Array();
-
-                                                            firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
-                                                                querySnapshot.docChanges().forEach(function (change) {
-                                                                    var id = change.doc.id;
-                                                                    cont.push(id);
-                                                                    if (cont.length === 2) {
-                                                                        firestore.collection("afterDetection").doc(cont[1]).delete();
-                                                                    }
-
-                                                                });
-                                                            });
-
+                                                            afterDetection();
+                                                            ad();
+                                                        } else {
+                                                            afterDetection();
+                                                            ad();
                                                         }
                                                     }
 
 
-                                                });
+                                                }
+
+                                            });
+                                        });
+                                        function afterDetection() {
+                                            const docRef = firestore.collection("afterDetection/").doc();
+                                            docRef.set({
+                                                disable: disable,
+                                                isMatch: isMatch,
+                                                empID: empID,
+                                                isDone: "true",
+                                                name: name
+
+                                            }).then(function () {
+                                                console.log("Status save!");
                                             });
 
+
                                         }
-                                    }, 2000);
 
-
-
+                                    }
                                 });
                             });
 
@@ -159,7 +120,6 @@ and open the template in the editor.
 
                 });
             });
-
 
 
 
