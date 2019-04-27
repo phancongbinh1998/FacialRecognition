@@ -88,7 +88,7 @@ and open the template in the editor.
                    font-size: 16px;
                    color: #fff;
                    -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; margin-left: 395px;"/>
-            <input type="reset" value="Reset" style="display: inline-block;
+            <input type="reset" value="Reset" onclick="reset()" style="display: inline-block;
                    height: 50px;
                    margin: 5px;
                    width: 75px;
@@ -132,6 +132,10 @@ and open the template in the editor.
                     }
                 }
 
+            }
+            function reset() {
+               document.getElementById("username").value = '';
+               document.getElementById("password").value = '';
             }
 
             function adminDTO() {
