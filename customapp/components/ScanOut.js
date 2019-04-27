@@ -69,245 +69,234 @@ class CameraRoute extends Component {
         .then((imageBlob) => {
 
 
-            var task = ref.put(imageBlob, { contentType: 'image/jpg' });
+            ref.put(imageBlob, { contentType: 'image/jpg' }).then(
+                        function  a() {
+                                                window.XMLHttpRequest = tempWindowXMLHttpRequest;
 
+                                                let cont = new Array();
+                                                                firestore.collection("loginURLs").onSnapshot(function (querySnapshot) {
+                                                                    querySnapshot.docChanges().forEach(function (change) {
+                                                                        var id = change.doc.id;
+                                                                        cont.push(id);
+                                                                        if (cont.length === 2) {
+                                                                            firestore.collection("loginURLs").doc(cont[1]).delete();
+                                                                        }
 
+                                                                    });
+                                                                });
+                                                ref.getDownloadURL().then(function (downloadURL) {
+                                                      const docRef = firestore.collection("loginURLs/").doc();
+                                                           docRef.set({
+                                                                url: downloadURL,
+                                                                dateLogin: date
+                                                      });
 
-        }).then(() => {
-            setTimeout(function () {
-                        window.XMLHttpRequest = tempWindowXMLHttpRequest;
+                                                  });
+                                           Alert.alert(
+                                             'Processing...',
+                                             'Please waiting...',
+                                             [
 
-                        let cont = new Array();
-                                        firestore.collection("loginURLs").onSnapshot(function (querySnapshot) {
-                                            querySnapshot.docChanges().forEach(function (change) {
-                                                var id = change.doc.id;
-                                                cont.push(id);
-                                                if (cont.length === 2) {
-                                                    firestore.collection("loginURLs").doc(cont[1]).delete();
-                                                }
+                                             ],
+                                             {cancelable: false},
+                                           );
 
-                                            });
-                                        });
-                        ref.getDownloadURL().then(function (downloadURL) {
-                              const docRef = firestore.collection("loginURLs/").doc();
-                                   docRef.set({
-                                        url: downloadURL,
-                                        dateLogin: date
-                              });
+                                          var fb = firestore.collection("Match").onSnapshot(function (querySnapshot) {
+                                              querySnapshot.docChanges().forEach(function (change) {
+                                                  if(change.doc.data().isMatch === 'false'){
+                                                     alert('FA Authentication Failed !');
+                                                      let brr = new Array();
 
-                          });
-                  Alert.alert(
-                       'Processing...',
-                       'Please waiting...',
-                       [
+                                                    firestore.collection("Match").onSnapshot(function (querySnapshot) {
+                                                          querySnapshot.docChanges().forEach(function (change) {
+                                                              var id = change.doc.id;
+                                                              brr.push(id);
+                                                              if (brr.length === 1) {
+                                                                  firestore.collection("Match").doc(brr[0]).delete();
+                                                              }
 
-                       ],
-                       {cancelable: false},
-                     );
-                  firestore.collection("Match").onSnapshot(function (querySnapshot) {
-                      querySnapshot.docChanges().forEach(function (change) {
-                          if(change.doc.data().isMatch === 'false'){
-                             alert('FA Authentication Failed !');
-                              let brr = new Array();
+                                                          });
+                                                      });
+                                                   let crr = new Array();
 
-                              firestore.collection("Match").onSnapshot(function (querySnapshot) {
-                                  querySnapshot.docChanges().forEach(function (change) {
-                                      var id = change.doc.id;
-                                      brr.push(id);
-                                      if (brr.length === 1) {
-                                          firestore.collection("Match").doc(brr[0]).delete();
-                                      }
+                                                                 firestore.collection("loginURLs").onSnapshot(function (querySnapshot) {
+                                                                     querySnapshot.docChanges().forEach(function (change) {
+                                                                         var id = change.doc.id;
+                                                                         crr.push(id);
+                                                                         if (crr.length === 1) {
+                                                                             firestore.collection("loginURLs").doc(crr[0]).delete();
+                                                                         }
 
-                                  });
-                              });
-               let crr = new Array();
+                                                                     });
+                                                                 });
+                                                                fb();
+                                                              }
 
-                             firestore.collection("loginURLs").onSnapshot(function (querySnapshot) {
-                                 querySnapshot.docChanges().forEach(function (change) {
-                                     var id = change.doc.id;
-                                     crr.push(id);
-                                     if (crr.length === 1) {
-                                         firestore.collection("loginURLs").doc(crr[0]).delete();
-                                     }
+                                                          });
+                                          });
 
-                                 });
-                             });
-               let drr = new Array();
-
-                        firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
-                            querySnapshot.docChanges().forEach(function (change) {
-                                var id = change.doc.id;
-                                drr.push(id);
-                                if (drr.length === 1) {
-                                    firestore.collection("afterDetection").doc(drr[0]).delete();
-                                }
-
-                            });
-                        });
-                          }
-
-                      });
-                  });
-                 firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
-                       querySnapshot.docChanges().forEach(function (change) {
-                        if(change.doc.data().isDone === 'true'){
-                               firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
-                                      querySnapshot.docChanges().forEach(function (change) {
+                                         var ad = firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
+                                               querySnapshot.docChanges().forEach(function (change) {
+                                                if(change.doc.data().isDone === 'true'){
                                                 var disable = change.doc.data().disable;
                                                 var empID = change.doc.data().empID;
                                                 var isMatch = change.doc.data().isMatch;
 
 
-                                                            if(disable === 'false' && isMatch ==='true'){
+                                                if(disable === 'false' && isMatch ==='true'){
 
-                                                                    var userID;
-                                                                    var date = new Date();
-                                                                    var msg = '';
-                                                                    var str = '';
-                                                                    var strDate = '';
-                                                                    var name = '';
-                                                                    firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
-                                                                          querySnapshot.docChanges().forEach(function (change) {
-                                                                                  userID = change.doc.data().empID;
-                                                                                  name = change.doc.data().name;
-                                                                                  msg = 'empID: ' + userID + ' Name: ' + name;
-                                                                                  Alert.alert(
-                                                                                    'Comfirm access',
-                                                                                    msg,
-                                                                                    [
+                                                        var userID;
+                                                        var date = new Date();
+                                                        var msg = '';
+                                                        var str = '';
+                                                        var strDate = '';
+                                                        var name = '';
 
-                                                                                      {
-                                                                                        text: 'Cancel',
-                                                                                        onPress: () => alert('Cancel Pressed'),
-                                                                                        style: 'cancel',
-                                                                                      },
-                                                                                      {text: 'Scan Out', onPress: () => setTimeout(function () {
-                                                                                      var hours = date.getHours();
-                                                                                      var minutes = date.getMinutes();
-                                                                                      var seconds = date.getSeconds();
-                                                                                      var ampm = hours >= 12 ? 'PM' : 'AM';
-                                                                                      hours = hours % 12;
-                                                                                      hours = hours ? hours : 12; // the hour '0' should be '12'
-                                                                                      minutes = minutes < 10 ? '0'+minutes : minutes;
-                                                                                      var strTime = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+                                                                      userID = change.doc.data().empID;
+                                                                      name = change.doc.data().name;
+                                                                      msg = 'empID: ' + userID + ' Name: ' + name;
 
+                                                                      Alert.alert(
+                                                                        'Comfirm access',
+                                                                        msg,
+                                                                        [
 
-                                                                                   firestore.collection("Employee").onSnapshot(function (querySnapshot) {
-                                                                                                      querySnapshot.docChanges().forEach(function (change) {
-
-                                                                                                            if(userID === change.doc.data().EmpID){
-
-                                                                                                                    strDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
-                                                                                                                    firestore.collection("Employee").doc(change.doc.id).update({
-                                                                                                                            ScanOutLocation: 'Main Office: FR',
-                                                                                                                            ScanOut: strTime,
-                                                                                                                            AttendanceDate: strDate
-
-                                                                                                                     });
+                                                                          {
+                                                                            text: 'Cancel',
+                                                                            onPress: () => alert('Cancel Pressed'),
+                                                                            style: 'cancel',
+                                                                          },
+                                                                          {text: 'Scan Out', onPress: () => setTimeout(function () {
+                                                                          var hours = date.getHours();
+                                                                          var minutes = date.getMinutes();
+                                                                          var seconds = date.getSeconds();
+                                                                          var ampm = hours >= 12 ? 'PM' : 'AM';
+                                                                          hours = hours % 12;
+                                                                          hours = hours ? hours : 12; // the hour '0' should be '12'
+                                                                          minutes = minutes < 10 ? '0'+minutes : minutes;
+                                                                          var strTime = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
 
 
-                                                                                                            }
-                                                                                                       });
-                                                                                                });
+                                                                       firestore.collection("Employee").onSnapshot(function (querySnapshot) {
+                                                                                          querySnapshot.docChanges().forEach(function (change) {
 
-                                                                                let brr = new Array();
+                                                                                                if(userID === change.doc.data().EmpID){
 
-                                                                                                firestore.collection("Match").onSnapshot(function (querySnapshot) {
-                                                                                                    querySnapshot.docChanges().forEach(function (change) {
-                                                                                                        var id = change.doc.id;
-                                                                                                        brr.push(id);
-                                                                                                        if (brr.length === 1) {
-                                                                                                            firestore.collection("Match").doc(brr[0]).delete();
-                                                                                                        }
+                                                                                                        strDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+                                                                                                        firestore.collection("Employee").doc(change.doc.id).update({
+                                                                                                                ScanOutLocation: 'Main Office: HR',
+                                                                                                                ScanOut: strTime,
+                                                                                                                AttendanceDate: strDate
 
-                                                                                                    });
-                                                                                                });
-                                                                                 let crr = new Array();
+                                                                                                         });
 
-                                                                                               firestore.collection("loginURLs").onSnapshot(function (querySnapshot) {
-                                                                                                   querySnapshot.docChanges().forEach(function (change) {
-                                                                                                       var id = change.doc.id;
-                                                                                                       crr.push(id);
-                                                                                                       if (crr.length === 1) {
-                                                                                                           firestore.collection("loginURLs").doc(crr[0]).delete();
-                                                                                                       }
 
-                                                                                                   });
-                                                                                               });
-                                                                                 let drr = new Array();
+                                                                                                }
+                                                                                           });
+                                                                                    });
 
-                                                                                          firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
-                                                                                              querySnapshot.docChanges().forEach(function (change) {
-                                                                                                  var id = change.doc.id;
-                                                                                                  drr.push(id);
-                                                                                                  if (drr.length === 1) {
-                                                                                                      firestore.collection("afterDetection").doc(drr[0]).delete();
-                                                                                                  }
+                                                                            alert('SCAN OUT Successfully Done');
+                                                                      }, 1000)},
+                                                                        ],
+                                                                        {cancelable: false},
+                                                                      );
+                                                                       let brr = new Array();
 
-                                                                                              });
-                                                                                          });
-                                                                                        alert('SCAN OUT Successfully Done');
-                                                                                  }, 2000)},
-                                                                                    ],
-                                                                                    {cancelable: false},
-                                                                                  );
+                                                                                    firestore.collection("Match").onSnapshot(function (querySnapshot) {
+                                                                                        querySnapshot.docChanges().forEach(function (change) {
+                                                                                            var id = change.doc.id;
+                                                                                            brr.push(id);
+                                                                                            if (brr.length === 1) {
+                                                                                                firestore.collection("Match").doc(brr[0]).delete();
+                                                                                            }
 
-                                                                           });
+                                                                                        });
+                                                                                    });
+                                                                     let crr = new Array();
+
+                                                                                   firestore.collection("loginURLs").onSnapshot(function (querySnapshot) {
+                                                                                       querySnapshot.docChanges().forEach(function (change) {
+                                                                                           var id = change.doc.id;
+                                                                                           crr.push(id);
+                                                                                           if (crr.length === 1) {
+                                                                                               firestore.collection("loginURLs").doc(crr[0]).delete();
+                                                                                           }
+
+                                                                                       });
+                                                                                   });
+                                                                       let drr = new Array();
+
+                                                                               firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
+                                                                                   querySnapshot.docChanges().forEach(function (change) {
+                                                                                       var id = change.doc.id;
+                                                                                       drr.push(id);
+                                                                                       if (drr.length === 1) {
+                                                                                           firestore.collection("afterDetection").doc(drr[0]).delete();
+                                                                                       }
+
+                                                                                   });
+                                                                               });
+
+                                                            ad();
+
+
+                                                }
+                                                if(disable === 'true'){
+                                                   alert('Facial Recognition Authentication is Disable!!');
+                                                  let brr = new Array();
+
+                                                                 firestore.collection("Match").onSnapshot(function (querySnapshot) {
+                                                                     querySnapshot.docChanges().forEach(function (change) {
+                                                                         var id = change.doc.id;
+                                                                         brr.push(id);
+                                                                         if (brr.length === 1) {
+                                                                             firestore.collection("Match").doc(brr[0]).delete();
+                                                                         }
+
+                                                                     });
+                                                                 });
+                                                  let crr = new Array();
+
+                                                                firestore.collection("loginURLs").onSnapshot(function (querySnapshot) {
+                                                                    querySnapshot.docChanges().forEach(function (change) {
+                                                                        var id = change.doc.id;
+                                                                        crr.push(id);
+                                                                        if (crr.length === 1) {
+                                                                            firestore.collection("loginURLs").doc(crr[0]).delete();
+                                                                        }
+
                                                                     });
+                                                                });
+                                                  let drr = new Array();
+
+                                                                          firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
+                                                                              querySnapshot.docChanges().forEach(function (change) {
+                                                                                  var id = change.doc.id;
+                                                                                  drr.push(id);
+                                                                                  if (drr.length === 1) {
+                                                                                      firestore.collection("afterDetection").doc(drr[0]).delete();
+                                                                                  }
+
+                                                                              });
+                                                                          });
+
+                                                  ad();
+
+                                                }
+
+
+                                                }
+                                        });
+                           });
 
 
 
-
-                                                            }
-                                                            if(disable === 'true'){
-                                                               alert('Facial Recognition Authentication is Disable!!');
-                                                               let brr = new Array();
-
-                                                                             firestore.collection("Match").onSnapshot(function (querySnapshot) {
-                                                                                 querySnapshot.docChanges().forEach(function (change) {
-                                                                                     var id = change.doc.id;
-                                                                                     brr.push(id);
-                                                                                     if (brr.length === 1) {
-                                                                                         firestore.collection("Match").doc(brr[0]).delete();
-                                                                                     }
-
-                                                                                 });
-                                                                             });
-                                                              let crr = new Array();
-
-                                                                            firestore.collection("loginURLs").onSnapshot(function (querySnapshot) {
-                                                                                querySnapshot.docChanges().forEach(function (change) {
-                                                                                    var id = change.doc.id;
-                                                                                    crr.push(id);
-                                                                                    if (crr.length === 1) {
-                                                                                        firestore.collection("loginURLs").doc(crr[0]).delete();
-                                                                                    }
-
-                                                                                });
-                                                                            });
-                                                              let drr = new Array();
-
-                                                                       firestore.collection("afterDetection").onSnapshot(function (querySnapshot) {
-                                                                           querySnapshot.docChanges().forEach(function (change) {
-                                                                               var id = change.doc.id;
-                                                                               drr.push(id);
-                                                                               if (drr.length === 1) {
-                                                                                   firestore.collection("afterDetection").doc(drr[0]).delete();
-                                                                               }
-
-                                                                           });
-                                                                       });
-                                                            }
-
-                                                       });
-                                                  });
-                        }
-                });
-                       });
+                                    }
+                        );
 
 
 
-            }, 5000);
+        }).then(() => {
 
 
          });
