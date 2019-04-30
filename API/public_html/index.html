@@ -36,7 +36,7 @@ and open the template in the editor.
                     if (change.type === "added") {
                         count++;
                         if (change.doc.data().empID !== '' && count >= 5) {
-                            window.open('http://13.59.43.254/cgi-bin/saveimage.py');
+                            window.open('http://localhost:8000/cgi-bin/saveimage.py');
                         }
 
                     }
@@ -52,7 +52,7 @@ and open the template in the editor.
 
                             setTimeout(function () {
                                 if (isDone === 'false') {
-                                    window.open('http://13.59.43.254/cgi-bin/ftf42.py');
+                                    window.open('http://localhost:8000/cgi-bin/ftf42.py');
 
                                 }
                             }, 1000);
